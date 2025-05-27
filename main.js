@@ -12,7 +12,7 @@ let state={
     currentOp:"",
     result:"",
     sum:"",
-    
+    resultUsed:false
 };
  
  // Display 0 in startup 
@@ -28,61 +28,79 @@ let state={
 
         if (operator===""){ //if no operator is used
            
-            state = {...state, firstNum: firstNum + button.textContent };
-            display.textContent = state.firstNum;
+            state = {...state, firstNum: firstNum + button.textContent,
+            
         }
+        display.textContent = `${state.firstNum}`;
+   
+    }
         
         else{
-            
-            state = {...state, secondNum: secondNum+button.textContent };
-      state = {...state, currentOp: `${state.firstOp}${state.secondNum}` };
+            state = {...state, secondNum: secondNum+button.textContent, };
+      state = {...state, currentOp: `${state.firstOp}${state.secondNum}`
+    };
 
-      display.textContent = state.currentOp;
+      display.textContent = state.currentOp; 
    
       resultOp();
+      
     } 
     })
    
 })
 
-// When the opertation buttons are used
+// When the operation buttons are used
 const opBtn=document.querySelectorAll(".opBtn")
 
 opBtn.forEach(button=> {
     button.addEventListener("click", ()=>{
 
-        const {firstNum, secondNum, operator, sum}=state;
+        const {firstNum, secondNum, sum, resultUsed}=state;
 
-        // if only the firstNum is used
-        if(firstNum!=="" && secondNum ==="" ){
+ // For the very first operation flow only, secondNum not defined
+         if(firstNum!=="" && secondNum ==="" && resultUsed===false ){
            state= {...state, operator:button.textContent,
-           firstOp:`${firstNum}${button.textContent}`};// why button.textcontenct but not state.operator???
+           firstOp:`${firstNum}${button.textContent}`};
            display.textContent=state.firstOp;
-        }
+           console.log(state)
         
+        }
 
-        // if only both firstNum and SecondNum is already used
-        else if(firstNum!=="" && secondNum!=="" && sum===""){        
+    // SecondNum previously defined but set to zero and operation button is clicked more than one time
+        else if (firstNum!=="" && secondNum===""  && resultUsed===true){
+            state={...state, operator:button.textContent,
+                firstOp:`${state.currentOp}${button.textContent}`
+            }
+            display.textContent=state.firstOp;
+            
+        }
+
+        // if  both firstNum and SecondNum is already used
+       else  if(firstNum!=="" && secondNum!=="" && sum===""){        
             state={    
             ...state, operator:button.textContent,
-            firstOp:`${state.currentOp}${state.operator}`,
-            firstNum:state.result,
-            secondNum:""
+            firstOp:`${state.currentOp}${button.textContent}`,
+            firstNum:state.result, 
+            secondNum:"" 
             };
             display.textContent=state.firstOp;
+            
         }
 
-        // if the sum "=" button is already used
-        else if(firstNum!=="" && secondNum!=="" && sum!==""){ 
-            state= {...state, 
-                operator:button.textContent,
-                firstOp:`${firstNum}${state.operator}`,
-                sum:"",//prevent the loop from iterating only on this scope
+         // if sum "=" button is already used
+        else if(firstNum!=="" && sum!==""){ 
+            state= {...state, operator:button.textContent,
+                
+                firstOp:`${firstNum}${button.textContent}`,
+                sum:"" ,//prevent the loop from iterating on this scope only
                 secondNum:"",
+                resultUsed: false  // when op btn is clicked more than once
             };
             display.textContent=state.firstOp;
-        }
+            
+        } 
 
+        /* resultOp(); */
        
     }) 
 }) 
@@ -97,6 +115,7 @@ const reset = ()=>{
         sum:"",
         firstOp:"",
         currentOp:"",
+        resultUsed:false
     }
     display.textContent="0";
 }
@@ -104,14 +123,24 @@ const reset = ()=>{
 
 // When the equalTo is being used
 
-equalTo.addEventListener("click", ()=>
-    {
-    state={...state, 
-        firstNum:state.result, 
-        sum:equalTo.textContent}
-    display.textContent=state.result;
+equalTo.addEventListener("click", ()=>{
+    const {firstNum, secondNum, operator}=state;
 
-    console.log(state);
+   if (firstNum!=="" && operator!=="" && secondNum!=="") 
+    {
+state={...state, 
+        result:firstNum, 
+        sum:equalTo.textContent}
+
+   }
+    
+   // Only firstNum is defined
+    else if(firstNum!=="" && secondNum==="" ){
+        state={...state, result:firstNum} 
+        } 
+
+        display.textContent=state.result;
+    
     })
 
 function resultOp(){
@@ -120,7 +149,7 @@ function resultOp(){
     let num1=Number(firstNum); 
     let num2=Number(secondNum);
 
-// do the Calc using the operation
+// do the Calc using the operation 
 
   if (firstNum!=="" && operator==="+" && secondNum!==""){
        state={...state, result:num1+num2} 
@@ -138,10 +167,9 @@ function resultOp(){
         {
             state={...state, result:num1-num2} 
         }
-    else if(firstNum!=="" && secondNum===""){
-        state={...state, result:num1} 
-        } 
-    console.log(state.result)
+
+     state.resultUsed=true;
+     
 }
 
 
@@ -149,7 +177,12 @@ function resultOp(){
 
 const Clear=document.querySelector(".clear")
 
-Clear.addEventListener("click", reset)
+Clear.addEventListener("click", ()=>{
+    reset();
+    console.log(state)
+})
+
+
 
 //Clear the inputs one at a time
 
