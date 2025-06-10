@@ -198,13 +198,13 @@ const historyDisplay=document.querySelector(".historyDisplay");
 
 historyBtn.addEventListener("click", ()=>{
 
-    historyDisplay.innerHTML=state.history.map((item)=> `${item.expr}=${item.result}`)
+    historyDisplay.innerHTML=state.history.map((item)=>  `<div>${item.expr}=${item.result}</div>`).join("");
 
     console.log(historyDisplay.innerHTML)
 })
 
 //Clear the inputs one at a time
-
+/* 
 const back=document.querySelector(".back")
 
 back.addEventListener("click", ()=>{
@@ -213,7 +213,7 @@ back.addEventListener("click", ()=>{
         firstNum="";
         display.textContent=firstNum;
     }
-   /*  else if(operator!==""){
+    else if(operator!==""){
         operator="";
         display.textContent=firstOp;
     }
@@ -221,10 +221,10 @@ back.addEventListener("click", ()=>{
     else if(firstNum!=="" && secondNum!==""){
         secondNum="";
         display.textContent=firstOp;
-    } */
+    } 
 
 }
-)
+)*/
 
 
 // To do: the number of digits
@@ -237,6 +237,7 @@ back.addEventListener("click", ()=>{
 // Operation follow the Math rule
 // Up on equalTo clicked, only show the result and the next operations **Done**
 //num Btn is used up on result displayed **Done**
+// Add clear history
 
 
 
