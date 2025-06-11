@@ -144,7 +144,6 @@ state={...state,
 
 // display the result
         display.textContent=`=${state.firstNum}`;
-        console.log(state)
     })
 
 
@@ -177,6 +176,7 @@ function calCulate(){
         }
 
      state.resultUsed=true;
+     console.log(state)
      
 }
 
@@ -187,7 +187,6 @@ const Clear=document.querySelector(".clear")
 
 Clear.addEventListener("click", ()=>{
     reset();
-    console.log(state)
 })
 
 
@@ -200,7 +199,6 @@ historyBtn.addEventListener("click", ()=>{
 
     historyDisplay.innerHTML=state.history.map((item)=>  `<div>${item.expr}=${item.result}</div>`).join("");
 
-    console.log(historyDisplay.innerHTML)
 })
 
 //Clear the inputs one at a time
@@ -238,6 +236,7 @@ back.addEventListener("click", ()=>{
 // Up on equalTo clicked, only show the result and the next operations **Done**
 //num Btn is used up on result displayed **Done**
 // Add clear history
+//Btn input from keyboard
 
 
 
