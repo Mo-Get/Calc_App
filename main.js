@@ -139,7 +139,7 @@ state={...state,
         state={...state, result:firstNum} 
         } 
 
-        display.textContent=state.result;
+        display.textContent=` ${state.result}`;
     
     })
 
