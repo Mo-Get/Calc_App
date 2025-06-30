@@ -142,16 +142,9 @@ state={...state,
              state={...state}   
         } 
 
-<<<<<<< HEAD
         display.textContent=` ${state.result}`;
     
-=======
-// display the result
-        display.textContent=`=${state.firstNum}`;
->>>>>>> c43ae5369255a88c2dcd62c7bdd75db9a8ca31ec
     })
-
-
 
 
 function calCulate(){
