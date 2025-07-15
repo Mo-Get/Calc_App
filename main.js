@@ -1,21 +1,11 @@
-// DOM Section
+// DOM Selection
 const numBtn = document.querySelectorAll(".numBtn");
 const display = document.getElementById("disText");
 const equalTo = document.querySelector(".equalTo");
 
-// Assign inital values using destructuring
-let state = {
-    firstNum: "",
-    secondNum: "",
-    operator: "",
-    firstOp: "",
-    currentOp: "",
-    result: "",
-    sum: "",
-    resultUsed: false,
-    history: [],
-    numDisplay:false
-};
+// Modules
+import {calCulate, reset, getState, updateState} from "./calculate.js";
+
 
 // Display 0 in startup 
 let initDisplay = "0";
@@ -26,35 +16,33 @@ numBtn.forEach(button => {
 
     button.addEventListener("click", () => {
 
-        const { firstNum, secondNum, operator, sum } = state;
+        const { firstNum, secondNum, operator, sum, firstOp } = getState();
 
         // For the very first flow of calculation
-        if (operator === "") {
-            state = { ...state, firstNum: firstNum + button.textContent};
+        if (operator === "" && sum ==="") {
 
-            state={...state, currentOp:`${state.firstNum}`}
+            updateState("firstNum", firstNum+button.textContent);
+            updateState("currentOp", firstNum+button.textContent)
+
         }
 
         else if (sum !== "") { 
             reset();
-            state = { ...state, firstNum: state.firstNum + button.textContent, };
-
-            state={...state, currentOp:`${state.firstNum}`}
+            updateState("firstNum", button.textContent);
+            updateState("currentOp", button.textContent)
         }  
 
         //FirstNum is already defined
         else {
-            state = { ...state, secondNum: secondNum + button.textContent, };
 
-            state = {
-                ...state, currentOp: `${state.firstOp}${state.secondNum}`
-            };
+            updateState("secondNum", secondNum+button.textContent);
+            updateState("currentOp", `${firstOp}${secondNum+button.textContent}`);
 
             calCulate();
 
         }
-        
-        state={...state, numDisplay:true};
+
+        updateState("numDisplay", true);
         displayValues();
     })
 
@@ -66,163 +54,99 @@ const opBtn = document.querySelectorAll(".opBtn")
 opBtn.forEach(button => {
     button.addEventListener("click", () => {
 
-        const { firstNum, secondNum, sum, currentOp, result, resultUsed } = state;
+        const { firstNum, secondNum, sum, currentOp, result, resultUsed } = getState();
 
         // For the very first operation flow only, secondNum not defined
-        if (firstNum !== "" && secondNum === "" && resultUsed === false) {
-            state = {
-                ...state, operator: button.textContent
-            };
-            state={...state, firstOp: `${firstNum}${state.operator}`}
-            
+    if (firstNum !== "" && secondNum === "" && resultUsed === false && sum ==="") {
+            updateState("operator", button.textContent);
+            updateState("firstOp", `${firstNum}${button.textContent}`);
         }
 
         //operation button is clicked more than one time and operation is being used for more than two numbers
-        else if (firstNum !== "" && secondNum === "" && resultUsed === true) {
-            state = {
-                ...state, operator: button.textContent,
-                }
-            state={...state, firstOp: `${currentOp}${state.operator}`
-            }
-
+    else if (firstNum !== "" && secondNum === "" && resultUsed === true && sum ==="") {
+        updateState("operator", button.textContent);
+        updateState("firstOp", `${currentOp}${button.textContent}`)
         }
 
         // if  both firstNum and SecondNum is already used
         else if (firstNum !== "" && secondNum !== "" && sum === "") {
-            state = {
-                ...state, operator: button.textContent,
-                firstNum: result,
-                secondNum: ""
-            };
-            state={...state, firstOp: `${currentOp}${state.operator}`}
+        updateState("operator", button.textContent);
+        updateState("firstNum", result);
+        updateState("secondNum", "");
+        updateState("firstOp", `${currentOp}${button.textContent}`)
         }
 
         // if sum "=" button is already used
-        else if (firstNum !== "" && sum !== "") {
-            state = {
-                ...state, operator: button.textContent,
-                firstOp: `${firstNum}${button.textContent}`,
-                sum: "",//prevent the loop from iterating on this scope only
-                secondNum: "",
-                resultUsed: false  // when op btn is clicked more than once
+        else if (firstNum !== "" && sum === "=") {
+            updateState("operator", button.textContent);
+            updateState("firstOp", `${result}${button.textContent}`);
+            updateState("sum","");//prevent the loop from iterating on this scope only
+            updateState("secondNum", "");
+            updateState("resultUsed", false );// when op btn is clicked more than once
             };
 
-        }
-
-        
+        updateState("numDisplay", false);
         displayValues();
     
-    })
+})
 })
 
 //display the values
 function displayValues(){
-const {firstNum, sum, secondNum, operator, numDisplay}=state;
+const {firstNum, sum, secondNum, result, currentOp, firstOp, numDisplay}=getState();
+
 //clear button is used
    if (firstNum===""){ 
     display.textContent = "0";
    }
+
 // display result
-   else if(sum!==""){
-    display.textContent=`=${firstNum}` ;
+   else if(firstNum !== ""  && sum==="=" && secondNum !== ""){
+    display.textContent=`=${result}` ;
    }
+
 // only firstnum is used for result
-   else if (firstNum !== "" && sum!=="" && secondNum === "") {
+   else if (firstNum !== ""  && sum==="=" && secondNum === "") {
     display.textContent=`=${firstNum}`;
-    console.log("test")
     }
 
 //display number Buttons
   else if (numDisplay){
-    display.textContent=state.currentOp;
+    display.textContent=currentOp;
+    
    }
 
 //display operation Buttons
    else if (!numDisplay){
-    display.textContent=state.firstOp;
+    display.textContent=firstOp;
    }
 
-   state={...state, numDisplay:false};
+
 }
 
 
-
-//reset all operation
-const reset = () => {
-    state = {
-        firstNum: "",
-        secondNum: "",
-        operator: "",
-        result: "",
-        sum: "",
-        firstOp: "",
-        currentOp: "",
-        resultUsed: false,
-        history: [...state.history]
-    }
-    displayValues();
-}
 
 
 // When the equalTo is being used
 equalTo.addEventListener("click", () => {
-    const { firstNum, secondNum, operator, currentOp, result } = state;
+    const { firstNum, secondNum, currentOp, sum, result } = getState();
 
-    if (firstNum !== "" && operator !== "" && secondNum !== "") {
-        state = {
-            ...state,
-            firstNum: result,
-            sum: equalTo.textContent,
-            history: [...state.history, { expr: `${currentOp}`, result }]
-        }
+    if (firstNum !== "" && secondNum !== "" && sum==="") {
+
+        updateState("firstNum", result);
+        updateState("sum", equalTo.textContent);
+        updateState("history", [...getState().history, {expr:currentOp, result}] );
     }
+    
     // Only firstNum is defined
     else if (firstNum !== "" && secondNum === "") {
-        state = { ...state, sum: equalTo.textContent, }
+        updateState("sum", equalTo.textContent);
+        updateState("result", firstNum);
     }
 
-<<<<<<< HEAD
-        display.textContent=` ${state.result}`;
-    
-=======
-// display the result
-        display.textContent=`=${state.firstNum}`;
->>>>>>> c43ae5369255a88c2dcd62c7bdd75db9a8ca31ec
+   displayValues();
+
     })
-
-
-function calCulate() {
-    const { firstNum, secondNum, operator } = state;
-    // Change the string to Number
-    let num1 = Number(firstNum);
-    let num2 = Number(secondNum);
-
-    // do the Calc using the operation 
-
-    if (firstNum !== "" && operator === "+" && secondNum !== "") {
-        state = { ...state, result: num1 + num2 }
-
-    }
-
-    else if (firstNum !== "" && operator === "x" && secondNum !== "") {
-        state = { ...state, result: num1 * num2 }
-    }
-
-    else if (firstNum !== "" && operator === "/" && secondNum === "0") {
-        state = { ...state, result: "Invalid" }
-    }
-
-    else if (firstNum !== "" && operator === "/" && secondNum !== "") {
-        state = { ...state, result: num1 / num2 }
-    }
-
-    else if (firstNum !== "" && operator === "-" && secondNum !== "") {
-        state = { ...state, result: num1 - num2 }
-    }
-
-    state.resultUsed = true;
-
-}
 
 
 // To clear the inputs and result
@@ -230,40 +154,54 @@ const Clear = document.querySelector(".clear")
 
 Clear.addEventListener("click", () => {
     reset();
+    displayValues();
 })
 
 
 // Display History
-
 const historyBtn = document.querySelector(".historyBtn");
 const historyDisplay = document.querySelector(".historyDisplay");
 
 historyBtn.addEventListener("click", () => {
 
-    historyDisplay.innerHTML = state.history.map((item) => `<div>${item.expr}=${item.result}</div>`).join("");
+    const {history}=getState();
+    historyDisplay.innerHTML = history.map((item) => `<div>${item.expr}=${item.result}</div>`).join("");
 
 })
+ 
 
 
+/* 
 //Clear the inputs one at a time
-function clearBack() {
-    let myArray;
-    const { firstNum, secondNum, operator } = state;
+ function clearBack() {
+    
+    const { firstNum, secondNum, currentOp, firstOp, numDisplay } = getState();
+ if ( numDisplay) {
+        const newSecondNum = secondNum.slice(0, -1);
 
-    if (firstNum !== "" && operator === "" && secondNum === "") {
-        myArray = firstNum.slice(0, -1)
-        state = { ...state, firstNum: myArray }
+            updateState("secondNum", newSecondNum)
+            updateState("currentOp",`${firstOp}${getState().secondNum}` );
+            updateState("numDisplay", true);
+            console.log(getState());
     }
-    else if (firstNum !== "" && operator !== "" && secondNum === "") {
-        myArray = operator.slice(0, -1)
-        state = { ...state, operator: myArray }
+     
+    // to clear Operator
+    else if (!numDisplay) {
+        updateState("operator", "");
+        updateState("firstOp", firstNum);
+        updateState("currentOp",`${getState().firstOp}` )
+        console.log(getState());
     }
-    else if (firstNum !== "" && operator !== "" && secondNum !== "") {
-        myArray = secondNum.slice(0, -1);
-        state = { ...state, secondNum: myArray };
+
+    // to clear the firstNum
+    else if (firstNum !== "") {
+        const newFirstNum = firstNum.slice(0, -1)
+        updateState("firstNum", newFirstNum);
+        updateState("currentOp", getState().firstNum);
+        console.log(getState())
+        updateState("numDisplay", true);
     }
     
-    console.log(state);
 }
 
 const backBtn = document.querySelector(".back");
@@ -273,9 +211,9 @@ backBtn.addEventListener("click", () => {
     clearBack();
     calCulate();
     displayValues();
-})
+}) */
 
-
+ 
 
 
 // To do: the number of digits
